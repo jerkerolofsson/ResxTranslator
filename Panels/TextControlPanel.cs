@@ -95,7 +95,7 @@ namespace ResxTranslator.Panels
 								Log("*** possible inflation detected ***" + NL, Color.Maroon);
 							}
 
-							Log($"ellapsed time {watch.ElapsedMilliseconds}ms{NL}", Color.DarkCyan);
+							Log($"elapsed time {watch.ElapsedMilliseconds}ms{NL}", Color.DarkCyan);
 						}
 					}
 				}

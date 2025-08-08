@@ -281,16 +281,22 @@ namespace ResxTranslator
 
 				statusLabel.Text = $"Translating to {toCode} - {displayName} ({cultureName})";
 
-				// load source resx for every target language
-				// this will be translated in memory and stored for each language
-				var root = XElement.Load(inputPath);
+                // load source resx for every target language
+                // this will be translated in memory and stored for each language
+                var root = XElement.Load(inputPath);
 
-				var data = ResxProvider.CollectStrings(root);
+                var data = ResxProvider.CollectStrings(root);
 
 				if (newStringsBox.Checked && File.Exists(outputFile))
 				{
 					data = ResxProvider.CollectNewStrings(data, outputFile);
-					var span = new TimeSpan(0, 0, (int)(data.Count * 0.1));
+
+                    // Also include empty strings
+                    var target = XElement.Load(outputFile);
+                    var emptyTranslations = ResxProvider.CollectEmptyStrings(ResxProvider.CollectStrings(root), outputFile);
+                    data.AddRange(emptyTranslations);
+
+                    var span = new TimeSpan(0, 0, (int)(data.Count * 0.1));
 					estimationLabel.Text = $"{data.Count} {toCode} strings. Estimated completion in {span}";
 
 					// count per file

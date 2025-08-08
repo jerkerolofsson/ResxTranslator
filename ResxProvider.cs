@@ -75,13 +75,49 @@ namespace ResxTranslator
 		}
 
 
-		/// <summary>
-		/// Force merge hints from the specified file into the data collection.
-		/// </summary>
-		/// <param name="data">The data collection to modify</param>
-		/// <param name="hintPath">The path of the hints file</param>
-		/// <returns>Count of hints applied</returns>
-		public static int MergeHints(XElement root, XElement hints)
+
+        /// <summary>
+        /// Filters the data list by keeping only items that exists but are blank in
+        /// specified resx file (path). 
+        /// </summary>
+        /// <param name="data">Neutral/english</param>
+        /// <param name="path">Target translation</param>
+        /// <returns></returns>
+        public static List<XElement> CollectEmptyStrings(List<XElement> data, string path)
+        {
+            try
+            {
+                var target = XElement.Load(path);
+
+                return data
+                    .Where(e =>
+                        e.Attributes().Any(a => a.Name.LocalName == "space") &&
+                        e.Attribute("type") == null &&
+                        // !SKIP is a special flag indicating this entry should not be translated
+                        e.Element("comment")?.Value.ContainsICIC("!SKIP") != true &&
+
+						// The translation is empty
+                        string.IsNullOrEmpty(target.Elements("data")
+                            .FirstOrDefault(d => d.Attribute("name")?.Value == e.Attribute("name").Value)?.Element("value")?.Value)
+                    )
+                    .ToList();
+            }
+            catch
+            {
+                // TODO: ...
+            }
+
+            return data;
+        }
+
+
+        /// <summary>
+        /// Force merge hints from the specified file into the data collection.
+        /// </summary>
+        /// <param name="data">The data collection to modify</param>
+        /// <param name="hintPath">The path of the hints file</param>
+        /// <returns>Count of hints applied</returns>
+        public static int MergeHints(XElement root, XElement hints)
 		{
 			var count = 0;
 			foreach (var hint in hints.Elements())
